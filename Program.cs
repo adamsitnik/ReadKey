@@ -5,12 +5,30 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
+#if TARGETS_OSX
+using tcflag_t = System.UInt64;
+using speed_t = System.Int64;
+#else
+using tcflag_t = System.UInt32;
+using speed_t = System.UInt32;
+#endif
+
 namespace ReadKey
 {
     internal unsafe class Program
     {
-        const int TCSANOW = 0, STDIN_FILENO = 0, VTIME = 5, VMIN = 6, VERASE = 2;
-        const uint ISIG = 1, ICANON = 2, IXON = 1024, IXOFF = 4096, ECHO = 8, IEXTEN = 32768;
+        private const int TCSANOW = 0, STDIN_FILENO = 0;
+        private const uint ECHO = 8;
+        
+        private static int VTIME => OperatingSystem.IsMacOS() ? 17 : 5;
+        private static int VMIN => OperatingSystem.IsMacOS() ? 16 : 6;
+        private static int VERASE => OperatingSystem.IsMacOS() ? 3 : 2;
+        private static uint ISIG => (uint)(OperatingSystem.IsMacOS() ? 128 : 1);
+        private static uint ICANON => (uint)(OperatingSystem.IsMacOS() ? 256 : 2);
+        private static uint IXON => (uint)(OperatingSystem.IsMacOS() ? 512 : 1024);
+        private static uint IXOFF => (uint)(OperatingSystem.IsMacOS() ? 1024 : 4096);
+        private static uint IEXTEN => (uint)(OperatingSystem.IsMacOS() ? 1024 : 32768);
+
         private static Termios _initialSettings;
 
         static void Main()
@@ -221,14 +239,20 @@ public class KeyMapperTests_{term.Replace('-', '_')} : KeyMapperTests
         
         private struct Termios
         {
-            public uint c_iflag;
-            public uint c_oflag;
-            public uint c_cflag;
-            public uint c_lflag;
+#if TARGETS_OSX
+            private const int NCCS = 20;
+#else
+            private const int NCCS = 32;
+#endif
+            
+            public tcflag_t c_iflag;
+            public tcflag_t c_oflag;
+            public tcflag_t c_cflag;
+            public tcflag_t c_lflag;
             public byte c_line;
-            public fixed byte c_cc[32];
-            private uint __c_ispeed;
-            private uint __c_ospeed;
+            public fixed byte c_cc[NCCS];
+            private speed_t __c_ispeed;
+            private speed_t __c_ospeed;
         }
     }
     
