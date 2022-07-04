@@ -214,10 +214,10 @@ public class KeyMapperTests_{term.Replace('-', '_')} : KeyMapperTests
         static extern int tcsetattr(int fd, int optional_actions, Termios* p);
 
         [DllImport("libc")]
-        static extern int read(IntPtr fd, byte* buffer, int byteCount);
+        static extern int read(int fd, byte* buffer, int byteCount);
 
         [DllImport("libc")]
-        static extern int write(IntPtr fd, byte* buffer, int byteCount);
+        static extern int write(int fd, byte* buffer, int byteCount);
         
         private struct Termios
         {
