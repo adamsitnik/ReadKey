@@ -55,7 +55,7 @@ namespace ReadKey
                 ("Alt+1 (number one)", CKI('1', ConsoleKey.D1, ConsoleModifiers.Alt)),
                 ("Shift+1 (number one)", CKI('!', ConsoleKey.D1, ConsoleModifiers.Shift)),
 
-                // TODO: add comment why I need both 1 and 2
+                // On Linux Ctrl+2 behaves differently than Ctrl+1 (I have no idea why)
                 ("2 (number two)", CKI('2', ConsoleKey.D2)),
                 ("Ctrl+2 (number two)", CKI(default, ConsoleKey.D2, ConsoleModifiers.Control)), // https://github.com/dotnet/runtime/issues/802
                 ("Alt+2 (number two)", CKI('2', ConsoleKey.D2, ConsoleModifiers.Alt)),
@@ -63,7 +63,7 @@ namespace ReadKey
 
                 // OEM keys
                 ("= (equals sign)", CKI('=', ConsoleKey.OemPlus)),
-                ("Shift+'+' (plus sign)", new ConsoleKeyInfo('+', ConsoleKey.OemPlus, true, false, false)),
+                ("Shift+'=' (equals sign)", new ConsoleKeyInfo('+', ConsoleKey.OemPlus, true, false, false)),
                 ("Ctrl+'=' (equals sign)", new ConsoleKeyInfo(default, ConsoleKey.OemPlus, false, false, true)),
                 ("Alt+'=' (equals sign)", new ConsoleKeyInfo('=', ConsoleKey.OemPlus, false, true, false)),
 
@@ -104,13 +104,19 @@ namespace ReadKey
                 ("Left Arrow", CKI(default, ConsoleKey.LeftArrow)),
                 ("Ctrl+Left Arrow", CKI(default, ConsoleKey.LeftArrow, ConsoleModifiers.Control)),
                 ("Alt+Left Arrow", CKI(default, ConsoleKey.LeftArrow, ConsoleModifiers.Alt)),
+                
+                // Enter
+                ("Enter", CKI('\r', ConsoleKey.Enter)),
+                ("Ctrl+Enter", CKI('\r', ConsoleKey.Enter, ConsoleModifiers.Control)),
+                ("Alt+Enter", CKI('\r', ConsoleKey.Enter, ConsoleModifiers.Alt)),
+                ("Shift+Enter", CKI('\r', ConsoleKey.Enter, ConsoleModifiers.Shift)),
+                ("Ctrl+Alt+Shift+Enter", CKI('\r', ConsoleKey.Enter, ConsoleModifiers.Control | ConsoleModifiers.Alt | ConsoleModifiers.Shift)),
             };
             (string text, ConsoleKeyInfo keyInfo)[] numericKeypadTestCases =
             {
                 ("1 (number one using Numeric Keypad)", CKI('1', ConsoleKey.NumPad1)),
                 ("Ctrl+1 (number one using Numeric Keypad))", CKI(default, ConsoleKey.NumPad1, ConsoleModifiers.Control)),
                 ("+ (plus sign using Numeric Keypad))", CKI('+', ConsoleKey.Add)),
-                ("Ctrl+'+' (plus sign using Numeric Keypad))", CKI(default, ConsoleKey.Add, ConsoleModifiers.Control)),
                 ("- (minus sign using Numeric Keypad))", CKI('-', ConsoleKey.Subtract)),
                 ("Home", CKI(default, ConsoleKey.Home)),
                 ("Ctrl+Home", CKI(default, ConsoleKey.Home, ConsoleModifiers.Control)),
