@@ -45,6 +45,9 @@ namespace ReadKey
                 ("1 (number one)", new ConsoleKeyInfo('1', ConsoleKey.D1, false, false, false)),
                 ("Ctrl+1 (number one)", new ConsoleKeyInfo('1', ConsoleKey.D1, false, false, true)),
                 ("Alt+1 (number one)", new ConsoleKeyInfo('1', ConsoleKey.D1, false, true, false)),
+                ("2 (number two)", new ConsoleKeyInfo('2', ConsoleKey.D2, false, false, false)),
+                ("Ctrl+2 (number two)", new ConsoleKeyInfo('2', ConsoleKey.D2, false, false, true)),
+                ("Alt+2 (number two  )", new ConsoleKeyInfo('2', ConsoleKey.D2, false, true, false)),
                 ("+ (plus sign)", new ConsoleKeyInfo('+', ConsoleKey.OemPlus, true, false, false)),
                 ("= (equals sign)", new ConsoleKeyInfo('=', ConsoleKey.OemPlus, false, false, false)),
                 ("Escape", new ConsoleKeyInfo((char)(0x1B), ConsoleKey.Escape, false, false, false)),
@@ -60,6 +63,7 @@ namespace ReadKey
                 ("Ctrl+Home", new ConsoleKeyInfo(default, ConsoleKey.Home, false, false, true)),
                 ("Alt+Home", new ConsoleKeyInfo(default, ConsoleKey.Home, false, true, false)),
                 ("Ctrl+Alt+Home", new ConsoleKeyInfo(default, ConsoleKey.Home, false, true, true)),
+                ("Insert", new ConsoleKeyInfo(default, ConsoleKey.Insert, false, false, false)),
                 // no test cases for Shift+Home as it's terminal shortcut on Ubuntu (scroll to the top)
                 ("Left Arrow", new ConsoleKeyInfo(default, ConsoleKey.LeftArrow, false, false, false)),
                 ("Ctrl+Left Arrow", new ConsoleKeyInfo(default, ConsoleKey.LeftArrow, false, false, true)),
@@ -73,6 +77,7 @@ namespace ReadKey
                 ("- (minus sign using Numeric Keypad))", new ConsoleKeyInfo('-', ConsoleKey.Subtract, false, false, false)),
                 ("Home", new ConsoleKeyInfo(default, ConsoleKey.Home, false, false, false)),
                 ("Ctrl+Home", new ConsoleKeyInfo(default, ConsoleKey.Home, false, false, true)),
+                ("Insert", new ConsoleKeyInfo(default, ConsoleKey.Insert, false, false, false)),
             };
             
             List<(ConsoleKeyInfo keyInfo, byte[] input)> recorded = new();
