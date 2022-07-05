@@ -210,7 +210,7 @@ public class KeyMapperTests_{term.Replace('-', '_')} : KeyMapperTests
 {{
     protected override string EncodingCharset => ""{EncodingHelper.GetCharset()}"";
     protected override string Term => ""{term}"";
-    protected override string Verase => {verase};
+    protected override byte Verase => {verase};
     protected override string EncodedTerminalDb => ""{Convert.ToBase64String(db)}""; // {actualPath}
 
     protected override IEnumerable<(byte[], ConsoleKeyInfo)> RecordedScenarios
@@ -232,7 +232,7 @@ public class KeyMapperTests_{term.Replace('-', '_')} : KeyMapperTests
                 => (int)ch switch
                 {
                     0 => "default",
-                    >= 32 and <= 136 => $"'{ch.ToString()}'",
+                    >= 32 and <= 126 => $"'{ch.ToString()}'",
                     _ => $"(char){(int)ch}" // we can't print backspace and few other characters
                 };
         }
