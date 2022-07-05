@@ -274,7 +274,9 @@ public class KeyMapperTests_{term.Replace('-', '_')} : KeyMapperTests
 }}
 ");
             sb.AppendLine("```");
-            WriteLine(sb.ToString());
+
+            File.WriteAllText("upload_me.md", sb.ToString());
+            WriteLine("Please upload the contents of upload_me.md.");
 
             static string Format(ConsoleKeyInfo ki, byte[] input)
                 => $"yield return (new byte[] {{ {string.Join(", ", input)} }}, new ConsoleKeyInfo({ToSource(ki.KeyChar)}, ConsoleKey.{ki.Key.ToString()}, {((ki.Modifiers & ConsoleModifiers.Shift) != 0).ToString().ToLower()}, {((ki.Modifiers & ConsoleModifiers.Alt) != 0).ToString().ToLower()}, {((ki.Modifiers & ConsoleModifiers.Control) != 0).ToString().ToLower()}));";
