@@ -44,6 +44,7 @@ namespace ReadKey
                 ("a (lowercase)", new ConsoleKeyInfo('a', ConsoleKey.A, false, false, false)),
                 ("1 (number one)", new ConsoleKeyInfo('1', ConsoleKey.D1, false, false, false)),
                 ("Ctrl+1 (number one)", new ConsoleKeyInfo('1', ConsoleKey.D1, false, false, true)),
+                ("Alt+1 (number one)", new ConsoleKeyInfo('1', ConsoleKey.D1, false, true, false)),
                 ("+ (plus sign)", new ConsoleKeyInfo('+', ConsoleKey.OemPlus, true, false, false)),
                 ("= (equals sign)", new ConsoleKeyInfo('=', ConsoleKey.OemPlus, false, false, false)),
                 ("Escape", new ConsoleKeyInfo((char)(0x1B), ConsoleKey.Escape, false, false, false)),
