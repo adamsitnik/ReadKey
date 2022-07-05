@@ -257,14 +257,14 @@ namespace ReadKey
             sb.AppendLine("```cs");
             sb.Append(
 $@"
-public class KeyMapperTests_{term.Replace('-', '_')} : KeyMapperTests
+public class {term.Replace('-', '_')}_Data : TerminalData
 {{
     protected override string EncodingCharset => ""{EncodingHelper.GetCharset()}"";
     protected override string Term => ""{term}"";
-    protected override byte Verase => {verase};
+    internal override byte Verase => {verase};
     protected override string EncodedTerminalDb => ""{Convert.ToBase64String(db)}""; // {actualPath}
 
-    protected override IEnumerable<(byte[], ConsoleKeyInfo)> RecordedScenarios
+    internal override IEnumerable<(byte[], ConsoleKeyInfo)> RecordedScenarios
     {{
         get
         {{
