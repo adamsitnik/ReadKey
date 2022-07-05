@@ -39,45 +39,82 @@ namespace ReadKey
 
             (string text, ConsoleKeyInfo keyInfo)[] testCases =
             {
-                ("Z (uppercase) using Shift", new ConsoleKeyInfo('Z', ConsoleKey.Z, true, false, false)),
-                ("Z (uppercase) using Caps Lock", new ConsoleKeyInfo('Z', ConsoleKey.Z, false, false, false)),
-                ("a (lowercase)", new ConsoleKeyInfo('a', ConsoleKey.A, false, false, false)),
-                ("1 (number one)", new ConsoleKeyInfo('1', ConsoleKey.D1, false, false, false)),
-                ("Ctrl+1 (number one)", new ConsoleKeyInfo('1', ConsoleKey.D1, false, false, true)),
-                ("Alt+1 (number one)", new ConsoleKeyInfo('1', ConsoleKey.D1, false, true, false)),
-                ("2 (number two)", new ConsoleKeyInfo('2', ConsoleKey.D2, false, false, false)),
-                ("Ctrl+2 (number two)", new ConsoleKeyInfo('2', ConsoleKey.D2, false, false, true)),
-                ("Alt+2 (number two  )", new ConsoleKeyInfo('2', ConsoleKey.D2, false, true, false)),
-                ("+ (plus sign)", new ConsoleKeyInfo('+', ConsoleKey.OemPlus, true, false, false)),
-                ("= (equals sign)", new ConsoleKeyInfo('=', ConsoleKey.OemPlus, false, false, false)),
-                ("Escape", new ConsoleKeyInfo((char)(0x1B), ConsoleKey.Escape, false, false, false)),
-                ("Backspace", new ConsoleKeyInfo('\b', ConsoleKey.Backspace, false, false, false)),
-                ("Delete", new ConsoleKeyInfo((char)(0x7F), ConsoleKey.Delete, false, false, false)),
-                ("F12", new ConsoleKeyInfo(default, ConsoleKey.F12, false, false, false)),
-                ("Ctrl+F12", new ConsoleKeyInfo(default, ConsoleKey.F12, false, false, true)),
-                ("Alt+F12", new ConsoleKeyInfo(default, ConsoleKey.F12, false, true, false)),
-                ("Shift+F12", new ConsoleKeyInfo(default, ConsoleKey.F12, true,false, false)),
-                ("Ctrl+Alt+Shift+F12", new ConsoleKeyInfo(default, ConsoleKey.F12, true, true, true)),
+                // Uppercase characters: Capslock vs Shift
+                ("Z (uppercase) using Shift", CKI('Z', ConsoleKey.Z, ConsoleModifiers.Shift)),
+                ("Z (uppercase) using Caps Lock", CKI('Z', ConsoleKey.Z)),
+
+                // lowercase and its Ctrl/Alt permutations
+                ("a (lowercase)", CKI('a', ConsoleKey.A)),
+                ("Ctrl+a (lowercase)", CKI('a', ConsoleKey.A, ConsoleModifiers.Control)),
+                ("Alt+a (lowercase)", CKI('a', ConsoleKey.A, ConsoleModifiers.Alt)),
+                ("Ctrl+Alt+a (lowercase)", CKI('a', ConsoleKey.A, ConsoleModifiers.Control | ConsoleModifiers.Alt)),
+
+                // simple number(s) and its Ctrl/Alt/Shift permutations
+                ("1 (number one)", CKI('1', ConsoleKey.D1)),
+                ("Ctrl+1 (number one)", CKI(default, ConsoleKey.D1, ConsoleModifiers.Control)),
+                ("Alt+1 (number one)", CKI('1', ConsoleKey.D1, ConsoleModifiers.Alt)),
+                ("Shift+1 (number one)", CKI('!', ConsoleKey.D1, ConsoleModifiers.Shift)),
+
+                // TODO: add comment why I need both 1 and 2
+                ("2 (number two)", CKI('2', ConsoleKey.D2)),
+                ("Ctrl+2 (number two)", CKI(default, ConsoleKey.D2, ConsoleModifiers.Control)), // https://github.com/dotnet/runtime/issues/802
+                ("Alt+2 (number two)", CKI('2', ConsoleKey.D2, ConsoleModifiers.Alt)),
+                ("Shift+2 (number two)", CKI('@', ConsoleKey.D2, ConsoleModifiers.Shift)),
+
+                // OEM keys
+                ("= (equals sign)", CKI('=', ConsoleKey.OemPlus)),
+                ("Shift+'+' (plus sign)", new ConsoleKeyInfo('+', ConsoleKey.OemPlus, true, false, false)),
+                ("Ctrl+'=' (equals sign)", new ConsoleKeyInfo(default, ConsoleKey.OemPlus, false, false, true)),
+                ("Alt+'=' (equals sign)", new ConsoleKeyInfo('=', ConsoleKey.OemPlus, false, true, false)),
+
+                // Escape
+                ("Escape", CKI((char)27, ConsoleKey.Escape)),
+                ("Shift+Escape", new ConsoleKeyInfo((char)27, ConsoleKey.Escape, true, false, false)),
+                // not testing Escape + ctrl/alt as on Windows these shortcuts are used by the OS
+
+                // Bacspace
+                ("Backspace", CKI('\b', ConsoleKey.Backspace)),
+                ("Ctrl+Backspace", CKI('\b', ConsoleKey.Backspace, ConsoleModifiers.Control)),
+                ("Alt+Backspace", CKI('\b', ConsoleKey.Backspace, ConsoleModifiers.Alt)),
+                ("Ctrl+Alt+Backspace (don't press Ctrl+Alt+Delete!)", CKI('\b', ConsoleKey.Backspace, ConsoleModifiers.Control | ConsoleModifiers.Alt)),
+                ("Shift+Backspace", CKI('\b', ConsoleKey.Backspace, ConsoleModifiers.Shift)),
+                
+                // Delete, but without Ctrl+Alt+Delete ;)
+                ("Delete", CKI(default, ConsoleKey.Delete)),
+
+                // Functional Key
+                ("F12", CKI(default, ConsoleKey.F12)),
+                ("Ctrl+F12", CKI(default, ConsoleKey.F12, ConsoleModifiers.Control)),
+                ("Alt+F12", CKI(default, ConsoleKey.F12, ConsoleModifiers.Alt)),
+                ("Shift+F12", CKI(default, ConsoleKey.F12, ConsoleModifiers.Shift)),
+                ("Ctrl+Alt+Shift+F12", CKI(default, ConsoleKey.F12, ConsoleModifiers.Control | ConsoleModifiers.Alt | ConsoleModifiers.Shift)),
                 // no test cases for Ctrl+ALt+Fx as it's system shortcut that takes users to ttyX on Ubuntu
-                ("Home", new ConsoleKeyInfo(default, ConsoleKey.Home, false, false, false)),
-                ("Ctrl+Home", new ConsoleKeyInfo(default, ConsoleKey.Home, false, false, true)),
-                ("Alt+Home", new ConsoleKeyInfo(default, ConsoleKey.Home, false, true, false)),
-                ("Ctrl+Alt+Home", new ConsoleKeyInfo(default, ConsoleKey.Home, false, true, true)),
-                ("Insert", new ConsoleKeyInfo(default, ConsoleKey.Insert, false, false, false)),
+
+                // Home
+                ("Home", CKI(default, ConsoleKey.Home)),
+                ("Ctrl+Home", CKI(default, ConsoleKey.Home, ConsoleModifiers.Control)),
+                ("Alt+Home", CKI(default, ConsoleKey.Home, ConsoleModifiers.Alt)),
+                ("Ctrl+Alt+Home", CKI(default, ConsoleKey.Home, ConsoleModifiers.Control | ConsoleModifiers.Alt)),
                 // no test cases for Shift+Home as it's terminal shortcut on Ubuntu (scroll to the top)
-                ("Left Arrow", new ConsoleKeyInfo(default, ConsoleKey.LeftArrow, false, false, false)),
-                ("Ctrl+Left Arrow", new ConsoleKeyInfo(default, ConsoleKey.LeftArrow, false, false, true)),
-                ("Alt+Left Arrow", new ConsoleKeyInfo(default, ConsoleKey.LeftArrow, false, true, false)),
+
+                // Insert
+                ("Insert", CKI(default, ConsoleKey.Insert)),
+                
+                // Arrow key
+                ("Left Arrow", CKI(default, ConsoleKey.LeftArrow)),
+                ("Ctrl+Left Arrow", CKI(default, ConsoleKey.LeftArrow, ConsoleModifiers.Control)),
+                ("Alt+Left Arrow", CKI(default, ConsoleKey.LeftArrow, ConsoleModifiers.Alt)),
             };
             (string text, ConsoleKeyInfo keyInfo)[] numericKeypadTestCases =
             {
-                ("1 (number one using Numeric Keypad)", new ConsoleKeyInfo('1', ConsoleKey.NumPad1, false, false, false)),
-                ("Ctrl+1 (number one using Numeric Keypad))", new ConsoleKeyInfo('1', ConsoleKey.NumPad1, false, false, true)),
-                ("+ (plus sign using Numeric Keypad))", new ConsoleKeyInfo('+', ConsoleKey.Add, true, false, false)),
-                ("- (minus sign using Numeric Keypad))", new ConsoleKeyInfo('-', ConsoleKey.Subtract, false, false, false)),
-                ("Home", new ConsoleKeyInfo(default, ConsoleKey.Home, false, false, false)),
-                ("Ctrl+Home", new ConsoleKeyInfo(default, ConsoleKey.Home, false, false, true)),
-                ("Insert", new ConsoleKeyInfo(default, ConsoleKey.Insert, false, false, false)),
+                ("1 (number one using Numeric Keypad)", CKI('1', ConsoleKey.NumPad1)),
+                ("Ctrl+1 (number one using Numeric Keypad))", CKI(default, ConsoleKey.NumPad1, ConsoleModifiers.Control)),
+                ("+ (plus sign using Numeric Keypad))", CKI('+', ConsoleKey.Add)),
+                ("Ctrl+'+' (plus sign using Numeric Keypad))", CKI(default, ConsoleKey.Add, ConsoleModifiers.Control)),
+                ("- (minus sign using Numeric Keypad))", CKI('-', ConsoleKey.Subtract)),
+                ("Home", CKI(default, ConsoleKey.Home)),
+                ("Ctrl+Home", CKI(default, ConsoleKey.Home, ConsoleModifiers.Control)),
+                ("Insert", CKI(default, ConsoleKey.Insert)),
             };
             
             List<(ConsoleKeyInfo keyInfo, byte[] input)> recorded = new();
@@ -102,6 +139,9 @@ namespace ReadKey
             }
 
             PrintData(term, actualPath, db, verase, recorded);
+
+            static ConsoleKeyInfo CKI(char ch, ConsoleKey key, ConsoleModifiers modifiers = 0)
+                => new ConsoleKeyInfo(ch, key, (modifiers & ConsoleModifiers.Shift) != 0, (modifiers & ConsoleModifiers.Alt) != 0, (modifiers & ConsoleModifiers.Control) != 0);
         }
         private static void RecordTestCases((string text, ConsoleKeyInfo keyInfo)[] testCases, List<(ConsoleKeyInfo keyInfo, byte[] input)> recorded)
         {
