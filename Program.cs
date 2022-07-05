@@ -60,6 +60,9 @@ namespace ReadKey
                 ("Alt+Home", new ConsoleKeyInfo(default, ConsoleKey.Home, false, true, false)),
                 ("Ctrl+Alt+Home", new ConsoleKeyInfo(default, ConsoleKey.Home, false, true, true)),
                 // no test cases for Shift+Home as it's terminal shortcut on Ubuntu (scroll to the top)
+                ("Left Arrow", new ConsoleKeyInfo(default, ConsoleKey.LeftArrow, false, false, false)),
+                ("Ctrl+Left Arrow", new ConsoleKeyInfo(default, ConsoleKey.LeftArrow, false, false, true)),
+                ("Alt+Left Arrow", new ConsoleKeyInfo(default, ConsoleKey.LeftArrow, false, true, false)),
             };
             (string text, ConsoleKeyInfo keyInfo)[] numericKeypadTestCases =
             {
