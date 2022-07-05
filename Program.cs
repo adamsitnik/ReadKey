@@ -225,7 +225,15 @@ public class KeyMapperTests_{term.Replace('-', '_')} : KeyMapperTests
             WriteLine(sb.ToString());
 
             static string Format(ConsoleKeyInfo ki, byte[] input)
-                => $"yield return (new byte[] {{ {string.Join(", ", input)} }}, new ConsoleKeyInfo({(ki.KeyChar == default ? "default" : $"'{ki.KeyChar}'")}, ConsoleKey.{ki.Key.ToString()}, {((ki.Modifiers & ConsoleModifiers.Shift) != 0).ToString().ToLower()}, {((ki.Modifiers & ConsoleModifiers.Alt) != 0).ToString().ToLower()}, {((ki.Modifiers & ConsoleModifiers.Control) != 0).ToString().ToLower()}));";
+                => $"yield return (new byte[] {{ {string.Join(", ", input)} }}, new ConsoleKeyInfo({ToSource(ki.KeyChar)}, ConsoleKey.{ki.Key.ToString()}, {((ki.Modifiers & ConsoleModifiers.Shift) != 0).ToString().ToLower()}, {((ki.Modifiers & ConsoleModifiers.Alt) != 0).ToString().ToLower()}, {((ki.Modifiers & ConsoleModifiers.Control) != 0).ToString().ToLower()}));";
+
+            static string ToSource(char ch)
+                => (int)ch switch
+                {
+                    0 => "default",
+                    >= 32 and <= 136 => $"'{ch.ToString()}'",
+                    _ => $"(char){(int)ch}" // we can't print backspace and few other characters
+                };
         }
 
         [DllImport("libc", SetLastError = true)]
