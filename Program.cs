@@ -37,6 +37,12 @@ namespace ReadKey
 
             (string term, string actualPath, byte[] db) = ReadTerminalSettings();
 
+            string? appMode = new ConsolePal.TerminalFormatStrings(new TermInfo.Database(term, db)).KeypadXmit;
+            if (!string.IsNullOrEmpty(appMode))
+            {
+                Write(appMode); // transition into application mode
+            }
+
             (string text, ConsoleKeyInfo keyInfo)[] testCases =
             {
                 // Uppercase characters: Capslock vs Shift
@@ -161,9 +167,11 @@ namespace ReadKey
             }
         }
 
-        private static void WriteLine(string text)
+        private static void WriteLine(string text) => Write(text + "\n");
+
+        private static void Write(string text)
         {
-            byte[] utf8 = Encoding.UTF8.GetBytes(text + "\n");
+            byte[] utf8 = Encoding.UTF8.GetBytes(text);
             fixed (byte* pinned = utf8)
             {
                 write(1, pinned, utf8.Length);
