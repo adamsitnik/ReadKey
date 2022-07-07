@@ -135,7 +135,9 @@ namespace ReadKey
             {
                 do
                 {
-                    WriteLine($"Please don't use Numeric Keypad for now. Press `y' or 'Y` if you understand.");    
+                    WriteLine("1. Please don't use Numeric Keypad for now.");
+                    WriteLine("2. If given key combination does not work (it's used by the OS or the terminal) press Spacebar.");
+                    WriteLine("Press `y' or 'Y` if you understand both rules stated above.");
                 } while (!ReadAnswer());
                 
                 RecordTestCases(testCases, recorded);
@@ -163,7 +165,11 @@ namespace ReadKey
             {
                 WriteLine($"\nPlease press {text}");
                 int bytesRead = read(STDIN_FILENO, inputBuffer, 1024);
-                recorded.Add((keyInfo, new ReadOnlySpan<byte>(inputBuffer, bytesRead).ToArray()));
+
+                if (bytesRead > 0 && (inputBuffer[0] != ' ' || keyInfo.Key == ConsoleKey.Spacebar))
+                {
+                    recorded.Add((keyInfo, new ReadOnlySpan<byte>(inputBuffer, bytesRead).ToArray()));
+                }
             }
         }
 
