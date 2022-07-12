@@ -43,8 +43,57 @@ namespace ReadKey
                 Write(appMode); // transition into application mode
             }
 
+            (string text, ConsoleKeyInfo keyInfo)[] functionalKeys =
+                Enumerable.Range(1, 12).Select(i => ($"F{i}", CKI(default, ConsoleKey.F1 + i - 1))).ToArray();
+            (string text, ConsoleKeyInfo keyInfo)[] functionalKeysCtrl =
+                Enumerable.Range(1, 12).Select(i => ($"Ctrl+F{i}", CKI(default, ConsoleKey.F1 + i - 1, ConsoleModifiers.Control))).ToArray();
+            (string text, ConsoleKeyInfo keyInfo)[] functionalKeysAlt =
+                Enumerable.Range(1, 12).Select(i => ($"Alt+F{i}", CKI(default, ConsoleKey.F1 + i - 1, ConsoleModifiers.Alt))).ToArray();
+            (string text, ConsoleKeyInfo keyInfo)[] functionalKeysShift =
+                Enumerable.Range(1, 12).Select(i => ($"Shift+F{i}", CKI(default, ConsoleKey.F1 + i - 1, ConsoleModifiers.Shift))).ToArray();
+            (string text, ConsoleKeyInfo keyInfo)[] functionalKeysAll =
+                Enumerable.Range(1, 12).Select(i => ($"Ctrl+Alt+Shift+F{i}", CKI(default, ConsoleKey.F1 + i - 1, ConsoleModifiers.Shift | ConsoleModifiers.Control | ConsoleModifiers.Alt))).ToArray();
+            // not testing Ctrl+Alt+Fx as on Ubuntu that I am using it's switching between GUI and Linux Console
+            (string text, ConsoleKeyInfo keyInfo)[] homeEndUpDown = 
+                new ConsoleKey[] { ConsoleKey.Home, ConsoleKey.End, ConsoleKey.PageUp, ConsoleKey.PageDown }
+                .SelectMany(key => new (string text, ConsoleKeyInfo keyInfo)[]
+                {
+                    ($"{key}", CKI(default, key)),
+                    ($"Ctrl+{key}", CKI(default, key, ConsoleModifiers.Control)),
+                    ($"Alt+{key}", CKI(default, key, ConsoleModifiers.Alt)),
+                    ($"Ctrl+Alt+{key}", CKI(default, key, ConsoleModifiers.Control | ConsoleModifiers.Alt)),
+                    // not testing Shift as on Ubuntu it just scrolls the terminal for these keys
+                }).ToArray();
+            (string text, ConsoleKeyInfo keyInfo)[] arrows = 
+                new ConsoleKey[] { ConsoleKey.LeftArrow, ConsoleKey.UpArrow, ConsoleKey.DownArrow, ConsoleKey.RightArrow }
+                    .SelectMany(key => new (string text, ConsoleKeyInfo keyInfo)[]
+                    {
+                        ($"{key}", CKI(default, key)),
+                        ($"Ctrl+{key}", CKI(default, key, ConsoleModifiers.Control)),
+                        ($"Alt+{key}", CKI(default, key, ConsoleModifiers.Alt)),
+                        ($"Shift+{key}", CKI(default, key, ConsoleModifiers.Shift)),
+                        ($"Shift+Alt+{key}", CKI(default, key, ConsoleModifiers.Shift | ConsoleModifiers.Alt)),
+                        // not testing Ctrl+Alt as on Ubuntu it does nothing
+                    }).ToArray();
+            (string text, ConsoleKeyInfo keyInfo)[] inserts = new[]
+            {
+                ("Insert", CKI(default, ConsoleKey.Insert)),
+                ("Alt+Insert", CKI(default, ConsoleKey.Insert, ConsoleModifiers.Alt)),
+            };
+            (string text, ConsoleKeyInfo keyInfo)[] deletes = new[]
+            {
+                ("Delete", CKI(default, ConsoleKey.Delete)),
+                ("Ctrl+Delete", CKI(default, ConsoleKey.Delete, ConsoleModifiers.Control)),
+                ("Alt+Delete", CKI(default, ConsoleKey.Delete, ConsoleModifiers.Alt)),
+                ("Shift+Delete", CKI(default, ConsoleKey.Delete, ConsoleModifiers.Shift)),
+                ("Ctrl+Shift+Delete", CKI(default, ConsoleKey.Delete, ConsoleModifiers.Control | ConsoleModifiers.Shift)),
+                ("Alt+Shift+Delete", CKI(default, ConsoleKey.Delete, ConsoleModifiers.Alt | ConsoleModifiers.Shift)),
+                ("Ctrl+Alt+Shift+Delete", CKI(default, ConsoleKey.Delete, ConsoleModifiers.Control | ConsoleModifiers.Alt | ConsoleModifiers.Shift)),
+            };
             (string text, ConsoleKeyInfo keyInfo)[] testCases =
             {
+                ("F1", CKI(default, ConsoleKey.F1)),
+               
                 // Uppercase characters: Capslock vs Shift
                 ("Z (uppercase) using Shift", CKI('Z', ConsoleKey.Z, ConsoleModifiers.Shift)),
                 ("Z (uppercase) using Caps Lock", CKI('Z', ConsoleKey.Z)),
@@ -129,7 +178,7 @@ namespace ReadKey
                 ("Insert", CKI(default, ConsoleKey.Insert)),
             };
             
-            List<(ConsoleKeyInfo keyInfo, byte[] input)> recorded = new();
+            List<(ConsoleKeyInfo keyInfo, byte[] input, string comment)> recorded = new();
 
             try
             {
@@ -140,12 +189,20 @@ namespace ReadKey
                     WriteLine("Press `y' or 'Y` if you understand both rules stated above.");
                 } while (!ReadAnswer());
                 
-                RecordTestCases(testCases, recorded);
+                RecordTestCases(functionalKeys, recorded);
+                RecordTestCases(functionalKeysCtrl, recorded);
+                RecordTestCases(functionalKeysAlt, recorded);
+                RecordTestCases(functionalKeysShift, recorded);
+                RecordTestCases(functionalKeysAll, recorded);
+                RecordTestCases(homeEndUpDown, recorded);
+                RecordTestCases(arrows, recorded);
+                RecordTestCases(inserts, recorded);
+                RecordTestCases(deletes, recorded);
 
-                WriteLine(">>>>>>>>>>>> <<<<<<<<<<<<<<<<");
-                WriteLine($"Do you have Numeric Keypad? If yes, please press `y' or 'Y` and use it from now. If not, press 'n'.");
-                if (ReadAnswer())
-                    RecordTestCases(numericKeypadTestCases, recorded);
+                // WriteLine(">>>>>>>>>>>> <<<<<<<<<<<<<<<<");
+                // WriteLine($"Do you have Numeric Keypad? If yes, please press `y' or 'Y` and use it from now. If not, press 'n'.");
+                // if (ReadAnswer())
+                //     RecordTestCases(numericKeypadTestCases, recorded);
             }
             finally
             {
@@ -157,7 +214,8 @@ namespace ReadKey
             static ConsoleKeyInfo CKI(char ch, ConsoleKey key, ConsoleModifiers modifiers = 0)
                 => new ConsoleKeyInfo(ch, key, (modifiers & ConsoleModifiers.Shift) != 0, (modifiers & ConsoleModifiers.Alt) != 0, (modifiers & ConsoleModifiers.Control) != 0);
         }
-        private static void RecordTestCases((string text, ConsoleKeyInfo keyInfo)[] testCases, List<(ConsoleKeyInfo keyInfo, byte[] input)> recorded)
+
+        private static void RecordTestCases((string text, ConsoleKeyInfo keyInfo)[] testCases, List<(ConsoleKeyInfo keyInfo, byte[] input, string comment)> recorded)
         {
             byte* inputBuffer = stackalloc byte[1024];
 
@@ -166,9 +224,9 @@ namespace ReadKey
                 WriteLine($"\nPlease press {text}");
                 int bytesRead = read(STDIN_FILENO, inputBuffer, 1024);
 
-                if (bytesRead > 0 && (inputBuffer[0] != ' ' || keyInfo.Key == ConsoleKey.Spacebar))
+                if (bytesRead > 1)
                 {
-                    recorded.Add((keyInfo, new ReadOnlySpan<byte>(inputBuffer, bytesRead).ToArray()));
+                    recorded.Add((keyInfo, new ReadOnlySpan<byte>(inputBuffer, bytesRead).ToArray(), text));
                 }
             }
         }
@@ -265,7 +323,7 @@ namespace ReadKey
             }
         }
         
-        private static void PrintData(string term, string actualPath, byte[] db, byte verase, List<(ConsoleKeyInfo keyInfo, byte[] input)> recorded)
+        private static void PrintData(string term, string actualPath, byte[] db, byte verase, List<(ConsoleKeyInfo keyInfo, byte[] input, string comment)> recorded)
         {
             StringBuilder sb = new(1000);
             sb.AppendLine("```cs");
@@ -282,7 +340,7 @@ public class {term.Replace('-', '_')}_Data : TerminalData
     {{
         get
         {{
-{string.Join(Environment.NewLine, recorded.Select(x => Format(x.keyInfo, x.input)))}
+{string.Join(Environment.NewLine, recorded.Select(x => Format(x.keyInfo, x.input, x.comment)))}
         }}
     }}
 }}
@@ -292,8 +350,8 @@ public class {term.Replace('-', '_')}_Data : TerminalData
             File.WriteAllText("upload_me.md", sb.ToString());
             WriteLine("Please upload the contents of upload_me.md.");
 
-            static string Format(ConsoleKeyInfo ki, byte[] input)
-                => $"yield return (new byte[] {{ {string.Join(", ", input)} }}, new ConsoleKeyInfo({ToSource(ki.KeyChar)}, ConsoleKey.{ki.Key.ToString()}, {((ki.Modifiers & ConsoleModifiers.Shift) != 0).ToString().ToLower()}, {((ki.Modifiers & ConsoleModifiers.Alt) != 0).ToString().ToLower()}, {((ki.Modifiers & ConsoleModifiers.Control) != 0).ToString().ToLower()}));";
+            static string Format(ConsoleKeyInfo ki, byte[] input, string comment)
+                => $"yield return (new byte[] {{ {string.Join(", ", input)} }}, new ConsoleKeyInfo({ToSource(ki.KeyChar)}, ConsoleKey.{ki.Key.ToString()}, {((ki.Modifiers & ConsoleModifiers.Shift) != 0).ToString().ToLower()}, {((ki.Modifiers & ConsoleModifiers.Alt) != 0).ToString().ToLower()}, {((ki.Modifiers & ConsoleModifiers.Control) != 0).ToString().ToLower()})); // {comment}";
 
             static string ToSource(char ch)
                 => (int)ch switch
