@@ -169,13 +169,40 @@ namespace ReadKey
             };
             (string text, ConsoleKeyInfo keyInfo)[] numericKeypadTestCases =
             {
-                ("1 (number one using Numeric Keypad)", CKI('1', ConsoleKey.NumPad1)),
-                ("Ctrl+1 (number one using Numeric Keypad))", CKI(default, ConsoleKey.NumPad1, ConsoleModifiers.Control)),
-                ("+ (plus sign using Numeric Keypad))", CKI('+', ConsoleKey.Add)),
+                ("0 (using Numeric Keypad)", CKI('0', ConsoleKey.D0)),
+                ("1 (using Numeric Keypad)", CKI('1', ConsoleKey.D1)),
+                ("2 (using Numeric Keypad)", CKI('2', ConsoleKey.D2)),
+                ("3 (using Numeric Keypad)", CKI('3', ConsoleKey.D3)),
+                ("4 (using Numeric Keypad)", CKI('4', ConsoleKey.D4)),
+                ("5 (using Numeric Keypad)", CKI('5', ConsoleKey.D5)),
+                ("6 (using Numeric Keypad)", CKI('6', ConsoleKey.D6)),
+                ("7 (using Numeric Keypad)", CKI('7', ConsoleKey.D7)),
+                ("8 (using Numeric Keypad)", CKI('8', ConsoleKey.D8)),
+                ("9 (using Numeric Keypad)", CKI('9', ConsoleKey.D9)),
+                ("/ (divide sign using Numeric Keypad))", CKI('/', ConsoleKey.Divide)),
+                ("* (multiply sign using Numeric Keypad))", CKI('*', ConsoleKey.Multiply)),
                 ("- (minus sign using Numeric Keypad))", CKI('-', ConsoleKey.Subtract)),
-                ("Home", CKI(default, ConsoleKey.Home)),
-                ("Ctrl+Home", CKI(default, ConsoleKey.Home, ConsoleModifiers.Control)),
+                ("+ (plus sign using Numeric Keypad))", CKI('+', ConsoleKey.Add)),
+            };
+            
+            (string text, ConsoleKeyInfo keyInfo)[] numericKeypadTestCases2 =
+            {
                 ("Insert", CKI(default, ConsoleKey.Insert)),
+                ("Delete", CKI(default, ConsoleKey.Delete)),
+                ("End", CKI(default, ConsoleKey.End)),
+                ("Down Arrow", CKI(default, ConsoleKey.DownArrow)),
+                ("Page Down", CKI(default, ConsoleKey.PageDown)),
+                ("Left Arrow", CKI(default, ConsoleKey.LeftArrow)),
+                ("Begin (5)", CKI(default, ConsoleKey.NoName)),
+                ("Right Arrow", CKI(default, ConsoleKey.RightArrow)),
+                ("Home", CKI(default, ConsoleKey.Home)),
+                ("Up Arrow", CKI(default, ConsoleKey.UpArrow)),
+                ("Page Up", CKI(default, ConsoleKey.PageUp)),
+                
+                ("/ (divide sign using Numeric Keypad))", CKI('/', ConsoleKey.Divide)),
+                ("* (multiply sign using Numeric Keypad))", CKI('*', ConsoleKey.Multiply)),
+                ("- (minus sign using Numeric Keypad))", CKI('-', ConsoleKey.Subtract)),
+                ("+ (plus sign using Numeric Keypad))", CKI('+', ConsoleKey.Add)),
             };
             
             List<(ConsoleKeyInfo keyInfo, byte[] input, string comment)> recorded = new();
@@ -224,7 +251,7 @@ namespace ReadKey
                 WriteLine($"\nPlease press {text}");
                 int bytesRead = read(STDIN_FILENO, inputBuffer, 1024);
 
-                if (bytesRead > 1)
+                if (bytesRead > 1 || inputBuffer[0] != 27)
                 {
                     recorded.Add((keyInfo, new ReadOnlySpan<byte>(inputBuffer, bytesRead).ToArray(), text));
                 }
