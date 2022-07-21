@@ -31,8 +31,15 @@ namespace ReadKey
 
         private static Termios _initialSettings;
 
-        static void Main()
+        static void Main(string[] args)
         {
+            bool recordFunctional = Parse(args, 'f');
+            bool recordHome = Parse(args, 'h');
+            bool recordArrows = Parse(args, 'a');
+            bool recordInsert = Parse(args, 'i');
+            bool recordDelete = Parse(args, 'd');
+            bool recordNumeric = Parse(args, 'n');
+
             byte verase = ConfigureTerminal();
 
             (string term, string actualPath, byte[] db) = ReadTerminalSettings();
@@ -90,83 +97,6 @@ namespace ReadKey
                 ("Alt+Shift+Delete", CKI(default, ConsoleKey.Delete, ConsoleModifiers.Alt | ConsoleModifiers.Shift)),
                 ("Ctrl+Alt+Shift+Delete", CKI(default, ConsoleKey.Delete, ConsoleModifiers.Control | ConsoleModifiers.Alt | ConsoleModifiers.Shift)),
             };
-            (string text, ConsoleKeyInfo keyInfo)[] testCases =
-            {
-                ("F1", CKI(default, ConsoleKey.F1)),
-               
-                // Uppercase characters: Capslock vs Shift
-                ("Z (uppercase) using Shift", CKI('Z', ConsoleKey.Z, ConsoleModifiers.Shift)),
-                ("Z (uppercase) using Caps Lock", CKI('Z', ConsoleKey.Z)),
-
-                // lowercase and its Ctrl/Alt permutations
-                ("a (lowercase)", CKI('a', ConsoleKey.A)),
-                ("Ctrl+a (lowercase)", CKI('a', ConsoleKey.A, ConsoleModifiers.Control)),
-                ("Alt+a (lowercase)", CKI('a', ConsoleKey.A, ConsoleModifiers.Alt)),
-                ("Ctrl+Alt+a (lowercase)", CKI('a', ConsoleKey.A, ConsoleModifiers.Control | ConsoleModifiers.Alt)),
-
-                // simple number(s) and its Ctrl/Alt/Shift permutations
-                ("1 (number one)", CKI('1', ConsoleKey.D1)),
-                ("Ctrl+1 (number one)", CKI(default, ConsoleKey.D1, ConsoleModifiers.Control)),
-                ("Alt+1 (number one)", CKI('1', ConsoleKey.D1, ConsoleModifiers.Alt)),
-                ("Shift+1 (number one)", CKI('!', ConsoleKey.D1, ConsoleModifiers.Shift)),
-
-                // On Linux Ctrl+2 behaves differently than Ctrl+1 (I have no idea why)
-                ("2 (number two)", CKI('2', ConsoleKey.D2)),
-                ("Ctrl+2 (number two)", CKI(default, ConsoleKey.D2, ConsoleModifiers.Control)), // https://github.com/dotnet/runtime/issues/802
-                ("Alt+2 (number two)", CKI('2', ConsoleKey.D2, ConsoleModifiers.Alt)),
-                ("Shift+2 (number two)", CKI('@', ConsoleKey.D2, ConsoleModifiers.Shift)),
-
-                // OEM keys
-                ("= (equals sign)", CKI('=', ConsoleKey.OemPlus)),
-                ("Shift+'=' (equals sign)", new ConsoleKeyInfo('+', ConsoleKey.OemPlus, true, false, false)),
-                ("Ctrl+'=' (equals sign)", new ConsoleKeyInfo(default, ConsoleKey.OemPlus, false, false, true)),
-                ("Alt+'=' (equals sign)", new ConsoleKeyInfo('=', ConsoleKey.OemPlus, false, true, false)),
-
-                // Escape
-                ("Escape", CKI((char)27, ConsoleKey.Escape)),
-                ("Shift+Escape", new ConsoleKeyInfo((char)27, ConsoleKey.Escape, true, false, false)),
-                // not testing Escape + ctrl/alt as on Windows these shortcuts are used by the OS
-
-                // Bacspace
-                ("Backspace", CKI('\b', ConsoleKey.Backspace)),
-                ("Ctrl+Backspace", CKI('\b', ConsoleKey.Backspace, ConsoleModifiers.Control)),
-                ("Alt+Backspace", CKI('\b', ConsoleKey.Backspace, ConsoleModifiers.Alt)),
-                ("Ctrl+Alt+Backspace (don't press Ctrl+Alt+Delete!)", CKI('\b', ConsoleKey.Backspace, ConsoleModifiers.Control | ConsoleModifiers.Alt)),
-                ("Shift+Backspace", CKI('\b', ConsoleKey.Backspace, ConsoleModifiers.Shift)),
-                
-                // Delete, but without Ctrl+Alt+Delete ;)
-                ("Delete", CKI(default, ConsoleKey.Delete)),
-
-                // Functional Key
-                ("F12", CKI(default, ConsoleKey.F12)),
-                ("Ctrl+F12", CKI(default, ConsoleKey.F12, ConsoleModifiers.Control)),
-                ("Alt+F12", CKI(default, ConsoleKey.F12, ConsoleModifiers.Alt)),
-                ("Shift+F12", CKI(default, ConsoleKey.F12, ConsoleModifiers.Shift)),
-                ("Ctrl+Alt+Shift+F12", CKI(default, ConsoleKey.F12, ConsoleModifiers.Control | ConsoleModifiers.Alt | ConsoleModifiers.Shift)),
-                // no test cases for Ctrl+ALt+Fx as it's system shortcut that takes users to ttyX on Ubuntu
-
-                // Home
-                ("Home", CKI(default, ConsoleKey.Home)),
-                ("Ctrl+Home", CKI(default, ConsoleKey.Home, ConsoleModifiers.Control)),
-                ("Alt+Home", CKI(default, ConsoleKey.Home, ConsoleModifiers.Alt)),
-                ("Ctrl+Alt+Home", CKI(default, ConsoleKey.Home, ConsoleModifiers.Control | ConsoleModifiers.Alt)),
-                // no test cases for Shift+Home as it's terminal shortcut on Ubuntu (scroll to the top)
-
-                // Insert
-                ("Insert", CKI(default, ConsoleKey.Insert)),
-                
-                // Arrow key
-                ("Left Arrow", CKI(default, ConsoleKey.LeftArrow)),
-                ("Ctrl+Left Arrow", CKI(default, ConsoleKey.LeftArrow, ConsoleModifiers.Control)),
-                ("Alt+Left Arrow", CKI(default, ConsoleKey.LeftArrow, ConsoleModifiers.Alt)),
-                
-                // Enter
-                ("Enter", CKI('\r', ConsoleKey.Enter)),
-                ("Ctrl+Enter", CKI('\r', ConsoleKey.Enter, ConsoleModifiers.Control)),
-                ("Alt+Enter", CKI('\r', ConsoleKey.Enter, ConsoleModifiers.Alt)),
-                ("Shift+Enter", CKI('\r', ConsoleKey.Enter, ConsoleModifiers.Shift)),
-                ("Ctrl+Alt+Shift+Enter", CKI('\r', ConsoleKey.Enter, ConsoleModifiers.Control | ConsoleModifiers.Alt | ConsoleModifiers.Shift)),
-            };
             (string text, ConsoleKeyInfo keyInfo)[] numericKeypadTestCases =
             {
                 ("0 (using Numeric Keypad)", CKI('0', ConsoleKey.D0)),
@@ -211,27 +141,40 @@ namespace ReadKey
 
             try
             {
-                do
+                if (recordArrows || recordDelete || recordFunctional || recordHome || recordInsert)
                 {
-                    WriteLine("1. Please don't use Numeric Keypad for now.");
-                    WriteLine("2. If given key combination does not work (it's used by the OS or the terminal) press Spacebar.");
-                    WriteLine("Press `y' or 'Y` if you understand both rules stated above.");
-                } while (!ReadAnswer());
-                
-                RecordTestCases(functionalKeys, recorded);
-                RecordTestCases(functionalKeysCtrl, recorded);
-                RecordTestCases(functionalKeysAlt, recorded);
-                RecordTestCases(functionalKeysShift, recorded);
-                RecordTestCases(functionalKeysAll, recorded);
-                RecordTestCases(homeEndUpDown, recorded);
-                RecordTestCases(arrows, recorded);
-                RecordTestCases(inserts, recorded);
-                RecordTestCases(deletes, recorded);
+                    do
+                    {
+                        WriteLine("1. Please don't use Numeric Keypad for now.");
+                        WriteLine(
+                            "2. If given key combination does not work (it's used by the OS or the terminal) press Spacebar.");
+                        WriteLine("Press `y' or 'Y` if you understand both rules stated above.");
+                    } while (!ReadAnswer('Y'));
 
-                // WriteLine(">>>>>>>>>>>> <<<<<<<<<<<<<<<<");
-                // WriteLine($"Do you have Numeric Keypad? If yes, please press `y' or 'Y` and use it from now. If not, press 'n'.");
-                // if (ReadAnswer())
-                //     RecordTestCases(numericKeypadTestCases, recorded);
+                    RecordTestCases(recordFunctional, functionalKeys, recorded);
+                    RecordTestCases(recordFunctional, functionalKeysCtrl, recorded);
+                    RecordTestCases(recordFunctional, functionalKeysAlt, recorded);
+                    RecordTestCases(recordFunctional, functionalKeysShift, recorded);
+                    RecordTestCases(recordFunctional, functionalKeysAll, recorded);
+                    RecordTestCases(recordHome, homeEndUpDown, recorded);
+                    RecordTestCases(recordArrows, arrows, recorded);
+                    RecordTestCases(recordInsert, inserts, recorded);
+                    RecordTestCases(recordDelete, deletes, recorded);
+                }
+
+                if (recordNumeric)
+                {
+                    WriteLine(">>>>>>>>>>>> <<<<<<<<<<<<<<<<");
+                    do
+                    {
+                        WriteLine("Please press `1' (one) using your Numeric Keypad. You might need to press Num Lock first to toggle the mode.");
+                    } while (!ReadAnswer('1'));
+                    RecordTestCases(recordNumeric, numericKeypadTestCases, recorded);
+
+                    WriteLine(">>>>>>>>>>>> <<<<<<<<<<<<<<<<");
+                    WriteLine("Please press Num Lock to toggle the mode.");
+                    RecordTestCases(recordNumeric, numericKeypadTestCases2, recorded);
+                }
             }
             finally
             {
@@ -244,8 +187,13 @@ namespace ReadKey
                 => new ConsoleKeyInfo(ch, key, (modifiers & ConsoleModifiers.Shift) != 0, (modifiers & ConsoleModifiers.Alt) != 0, (modifiers & ConsoleModifiers.Control) != 0);
         }
 
-        private static void RecordTestCases((string text, ConsoleKeyInfo keyInfo)[] testCases, List<(ConsoleKeyInfo keyInfo, byte[] input, string comment)> recorded)
+        private static bool Parse(string[] args, char letter)
+            => args.Length == 0 || args[0].Contains(letter, StringComparison.OrdinalIgnoreCase);
+        
+        private static void RecordTestCases(bool record, (string text, ConsoleKeyInfo keyInfo)[] testCases, List<(ConsoleKeyInfo keyInfo, byte[] input, string comment)> recorded)
         {
+            if (!record) return;
+
             byte* inputBuffer = stackalloc byte[1024];
 
             foreach ((string text, ConsoleKeyInfo keyInfo) in testCases)
@@ -271,11 +219,11 @@ namespace ReadKey
             }
         }
 
-        private static bool ReadAnswer()
+        private static bool ReadAnswer(char confirm)
         {
             byte* inputBuffer = stackalloc byte[1];
             read(STDIN_FILENO, inputBuffer, 1);
-            return char.ToUpper((char)inputBuffer[0]) == 'Y';
+            return char.ToUpper((char)inputBuffer[0]) == confirm;
         }
 
         private static byte ConfigureTerminal()
@@ -377,7 +325,7 @@ public class {term.Replace('-', '_')}_Data : TerminalData
             sb.AppendLine("```");
 
             File.WriteAllText("upload_me.md", sb.ToString());
-            WriteLine("Please upload the contents of upload_me.md.");
+            WriteLine("Please upload the contents of upload_me.md. Thank you!");
 
             static string Format(ConsoleKeyInfo ki, byte[] input, string comment)
                 => $"yield return (new byte[] {{ {string.Join(", ", input)} }}, new ConsoleKeyInfo({ToSource(ki.KeyChar)}, ConsoleKey.{ki.Key.ToString()}, {((ki.Modifiers & ConsoleModifiers.Shift) != 0).ToString().ToLower()}, {((ki.Modifiers & ConsoleModifiers.Alt) != 0).ToString().ToLower()}, {((ki.Modifiers & ConsoleModifiers.Control) != 0).ToString().ToLower()})); // {comment}";
