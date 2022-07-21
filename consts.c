@@ -12,6 +12,9 @@ int main(void)
     printf("ICANON=%d \n", ICANON);
     printf("IXON=%d \n", IXON);
     printf("IXOFF=%d \n", IXOFF);
+    printf("ICRNL=%d \n", ICRNL);
+    printf("INLCR=%d \n", INLCR);
+    printf("IGNCR=%d \n", IGNCR);
     printf("ECHO=%d \n", ECHO);
     printf("IEXTEN=%d \n", IEXTEN);
 

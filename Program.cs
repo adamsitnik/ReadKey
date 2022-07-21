@@ -27,6 +27,9 @@ namespace ReadKey
         private static uint ICANON => (uint)(OperatingSystem.IsMacOS() ? 256 : 2);
         private static uint IXON => (uint)(OperatingSystem.IsMacOS() ? 512 : 1024);
         private static uint IXOFF => (uint)(OperatingSystem.IsMacOS() ? 1024 : 4096);
+        private static uint ICRNL => 256;
+        private static uint INLCR => 64;
+        private static uint IGNCR => 128;
         private static uint IEXTEN => (uint)(OperatingSystem.IsMacOS() ? 1024 : 32768);
 
         private static Termios _initialSettings;
@@ -114,6 +117,7 @@ namespace ReadKey
                 ("- (minus sign using Numeric Keypad))", CKI('-', ConsoleKey.Subtract)),
                 ("+ (plus sign using Numeric Keypad))", CKI('+', ConsoleKey.Add)),
                 ("Enter (using Numeric Keypad))", CKI('\r', ConsoleKey.Enter)),
+                (". (period using Numeric Keypad))", CKI('.', ConsoleKey.OemPeriod)),
             };
             
             (string text, ConsoleKeyInfo keyInfo)[] numericKeypadTestCases2 =
@@ -147,7 +151,7 @@ namespace ReadKey
                     {
                         WriteLine("1. Please don't use Numeric Keypad for now.");
                         WriteLine(
-                            "2. If given key combination does not work (it's used by the OS or the terminal) press Spacebar.");
+                            "2. If given key combination does not work (it's used by the OS or the terminal) press Escape.");
                         WriteLine("Press `y' or 'Y` if you understand both rules stated above.");
                     } while (!ReadAnswer('Y'));
 
@@ -201,7 +205,7 @@ namespace ReadKey
                 WriteLine($"\nPlease press {text}");
                 int bytesRead = read(STDIN_FILENO, inputBuffer, 1024);
 
-                if (bytesRead > 1 || inputBuffer[0] != 27)
+                if (bytesRead > 1 || inputBuffer[0] != 27) // escape is used to skip given scenario
                 {
                     recorded.Add((keyInfo, new ReadOnlySpan<byte>(inputBuffer, bytesRead).ToArray(), text));
                 }
@@ -236,7 +240,7 @@ namespace ReadKey
             // configure the terminal the same way CLR does: https://github.com/dotnet/runtime/blob/7414af2a5f6d8d99efc27d3f5ef7a394e0b23c42/src/native/libs/System.Native/pal_console.c#L152
             Termios copy = _initialSettings;
             copy.c_lflag |= ISIG;
-            copy.c_iflag &= ~(IXON | IXOFF);
+            copy.c_iflag &= ~(IXON | IXOFF | ICRNL | INLCR | IGNCR);
             copy.c_lflag &= ~(ICANON | IEXTEN); // in contrary to CLR, enable ECHO so the users see that their input has been recorded
             // copy.c_lflag &= ~(ECHO | ICANON | IEXTEN);
             copy.c_cc[VMIN] = 1;
