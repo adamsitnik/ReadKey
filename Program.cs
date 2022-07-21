@@ -183,6 +183,7 @@ namespace ReadKey
                 ("* (multiply sign using Numeric Keypad))", CKI('*', ConsoleKey.Multiply)),
                 ("- (minus sign using Numeric Keypad))", CKI('-', ConsoleKey.Subtract)),
                 ("+ (plus sign using Numeric Keypad))", CKI('+', ConsoleKey.Add)),
+                ("Enter (using Numeric Keypad))", CKI('\r', ConsoleKey.Enter)),
             };
             
             (string text, ConsoleKeyInfo keyInfo)[] numericKeypadTestCases2 =
@@ -203,6 +204,7 @@ namespace ReadKey
                 ("* (multiply sign using Numeric Keypad))", CKI('*', ConsoleKey.Multiply)),
                 ("- (minus sign using Numeric Keypad))", CKI('-', ConsoleKey.Subtract)),
                 ("+ (plus sign using Numeric Keypad))", CKI('+', ConsoleKey.Add)),
+                ("Enter (using Numeric Keypad))", CKI('\r', ConsoleKey.Enter)),
             };
             
             List<(ConsoleKeyInfo keyInfo, byte[] input, string comment)> recorded = new();
